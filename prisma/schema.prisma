@@ -16,26 +16,27 @@ datasource db {
 }
 
 model User {
-  id                    String         @id
-  username              String         @unique
+  id                    String             @id
+  username              String             @unique
   displayName           String
-  email                 String?        @unique
+  email                 String?            @unique
   passwordHash          String?
-  googleId              String?        @unique
+  googleId              String?            @unique
   avatarUrl             String?
   bio                   String?
   sessions              Session[]
   posts                 Post[]
-  following             Follow[]       @relation("Following")
-  followers             Follow[]       @relation("Followers")
+  following             Follow[]           @relation("Following")
+  followers             Follow[]           @relation("Followers")
   likes                 Like[]
-  bookmarks             Bookmark[]
-  comments              Comment[]
-  balance               Decimal       @default(0.0)
-  receivedNotifications Notification[] @relation("Recipient")
-  issuedNotifications   Notification[] @relation("Issuer")
-
-  createdAt DateTime @default(now())
+  bookmarks            Bookmark[]
+  comments             Comment[]
+  balance              Decimal            @default(0.0)
+  receivedNotifications Notification[]     @relation("Recipient")
+  issuedNotifications   Notification[]     @relation("Issuer")
+  createdTiers         SubscriptionTier[] @relation("CreatorTiers")
+  subscriptions        Subscription[]     @relation("Subscriber")
+  createdAt           DateTime           @default(now())
 
   @@map("users")
 }
@@ -148,4 +149,33 @@ enum NotificationType {
   LIKE
   FOLLOW
   COMMENT
+}
+
+model SubscriptionTier {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal
+  creatorId   String
+  creator     User          @relation("CreatorTiers", fields: [creatorId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("subscription_tiers")
+}
+
+model Subscription {
+  id           String          @id @default(cuid())
+  subscriberId String
+  subscriber   User            @relation("Subscriber", fields: [subscriberId], references: [id], onDelete: Cascade)
+  tierId       String
+  tier         SubscriptionTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime
+  autoRenew    Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@unique([subscriberId, tierId])
+  @@map("subscriptions")
 }

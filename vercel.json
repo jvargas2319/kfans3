@@ -3,6 +3,13 @@
     {
       "path": "/api/clear-uploads",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/handle-subscriptions",
+      "schedule": "0 * * * *",
+      "headers": {
+        "Authorization": "Bearer @CRON_SECRET"
+      }
     }
   ]
 }

@@ -19,18 +19,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { UserData } from "@/lib/types";
 import {
   updateUserProfileSchema,
   UpdateUserProfileValues,
+  SubscriptionTierValues,
 } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Camera } from "lucide-react";
+import { Camera, Plus, Trash2 } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
 import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import Resizer from "react-image-file-resizer";
 import { useUpdateProfileMutation } from "./mutations";
+import { Prisma } from "@prisma/client";
 
 interface EditProfileDialogProps {
   user: UserData;
@@ -48,11 +51,26 @@ export default function EditProfileDialog({
     defaultValues: {
       displayName: user.displayName,
       bio: user.bio || "",
+      subscriptionTiers: user.createdTiers?.map((tier: {
+        id: string;
+        name: string;
+        description: string | null;
+        price: Prisma.Decimal;
+      }) => ({
+        id: tier.id,
+        name: tier.name,
+        description: tier.description || undefined,
+        price: Number(tier.price),
+      })) || [],
     },
   });
 
-  const mutation = useUpdateProfileMutation();
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "subscriptionTiers",
+  });
 
+  const mutation = useUpdateProfileMutation();
   const [croppedAvatar, setCroppedAvatar] = useState<Blob | null>(null);
 
   async function onSubmit(values: UpdateUserProfileValues) {
@@ -76,7 +94,7 @@ export default function EditProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
         </DialogHeader>
@@ -92,37 +110,135 @@ export default function EditProfileDialog({
           />
         </div>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-            <FormField
-              control={form.control}
-              name="displayName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Display name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your display name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="bio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bio</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Tell us a little bit about yourself"
-                      className="resize-none"
-                      {...field}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-3">
+              <FormField
+                control={form.control}
+                name="displayName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Display name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your display name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell us a little bit about yourself"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Subscription Tiers</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    append({
+                      name: "",
+                      description: "",
+                      price: 4.99,
+                    })
+                  }
+                  disabled={fields.length >= 10}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Tier
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="relative rounded-lg border p-4 space-y-3"
+                  >
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-2"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    
+                    <FormField
+                      control={form.control}
+                      name={`subscriptionTiers.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tier Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Basic, Premium, VIP" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    
+                    <FormField
+                      control={form.control}
+                      name={`subscriptionTiers.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe what subscribers get with this tier"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name={`subscriptionTiers.${index}.price`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Price (USD)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              max="999.99"
+                              placeholder="4.99"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <DialogFooter>
               <LoadingButton type="submit" loading={mutation.isPending}>
                 Save

@@ -25,12 +25,29 @@ export const createPostSchema = z.object({
   mediaIds: z.array(z.string()).max(5, "Cannot have more than 5 attachments"),
 });
 
+export const subscriptionTierSchema = z.object({
+  name: requiredString.max(50, "Must be at most 50 characters"),
+  description: z.string().max(500, "Must be at most 500 characters").optional(),
+  price: z.number().min(0.01, "Price must be at least 0.01").max(999.99, "Price must be at most 999.99"),
+});
+
 export const updateUserProfileSchema = z.object({
   displayName: requiredString,
   bio: z.string().max(1000, "Must be at most 1000 characters"),
+  subscriptionTiers: z.array(subscriptionTierSchema).max(10, "Cannot have more than 10 subscription tiers"),
 });
 
-export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
+export type SubscriptionTierValues = z.infer<typeof subscriptionTierSchema>;
+export type UpdateUserProfileValues = {
+  displayName: string;
+  bio: string;
+  subscriptionTiers: {
+    id?: string;
+    name: string;
+    price: number;
+    description?: string;
+  }[];
+};
 
 export const createCommentSchema = z.object({
   content: requiredString,
