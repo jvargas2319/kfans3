@@ -1,0 +1,14 @@
+name: Handle Expired Subscriptions
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs at midnight UTC every day
+
+jobs:
+  handle_expired_subscriptions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger handle-expired-subscriptions endpoint
+        run: |
+          curl -X POST https://your-app-url.com/api/cron/handle-expired-subscriptions 

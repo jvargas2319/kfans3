@@ -134,7 +134,7 @@ export async function handleExpiredSubscriptions() {
             prisma.subscription.update({
               where: { id: subscription.id },
               data: {
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+                expiresAt: new Date(Date.now() + subscription.tier.durationInMonths * 30 * 24 * 60 * 60 * 1000),
               },
             }),
           ]);
@@ -171,33 +171,36 @@ export async function subscribe(tierId: string) {
   if (user.balance < Number(tier.price)) throw new Error("Insufficient balance");
 
   const subscription = await prisma.$transaction(async (tx) => {
-    const newSubscription = await tx.subscription.create({
-      data: {
-        subscriberId: user.id,
-        tierId: tier.id,
-        expiresAt: new Date(Date.now() + tier.durationInMonths * 30 * 24 * 60 * 60 * 1000),
-      },
-    });
-
-    await tx.user.update({
-      where: { id: user.id },
-      data: {
-        balance: {
-          decrement: Number(tier.price),
+    // Check if the user is already subscribed to the tier
+    const existingSubscription = await tx.subscription.findUnique({
+      where: {
+        subscriberId_tierId: {
+          subscriberId: user.id,
+          tierId: tier.id,
         },
       },
     });
 
-    await tx.user.update({
-      where: { id: tier.creatorId },
-      data: {
-        balance: {
-          increment: Number(tier.price),
+    if (existingSubscription) {
+      // If the user is already subscribed, update the expiresAt date
+      const updatedSubscription = await tx.subscription.update({
+        where: { id: existingSubscription.id },
+        data: {
+          expiresAt: new Date(Date.now() + tier.durationInMonths * 30 * 24 * 60 * 60 * 1000),
         },
-      },
-    });
-
-    return newSubscription;
+      });
+      return updatedSubscription;
+    } else {
+      // If the user is not subscribed, create a new subscription
+      const newSubscription = await tx.subscription.create({
+        data: {
+          subscriberId: user.id,
+          tierId: tier.id,
+          expiresAt: new Date(Date.now() + tier.durationInMonths * 30 * 24 * 60 * 60 * 1000),
+        },
+      });
+      return newSubscription;
+    }
   });
 
   const updatedUser = await prisma.user.findUnique({

@@ -28,6 +28,10 @@ const getUser = cache(async (username: string, loggedInUserId: string) => {
   return {
     ...user,
     balance: Number(user.balance),
+    createdTiers: user.createdTiers.map((tier) => ({
+      ...tier,
+      price: Number(tier.price),
+    })),
   };
 });
 

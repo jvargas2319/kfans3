@@ -9,7 +9,17 @@ import { User } from "lucia";
 interface SubscriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  tier: SubscriptionTier;
+  tier: {
+    id: string;
+    name: string;
+    description: string | null;
+    price: number;
+    color: string | null;
+    durationInMonths: number;
+    creatorId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
   loggedInUser: User | null;
 }
 
@@ -23,7 +33,7 @@ export default function SubscriptionDialog({ open, onOpenChange, tier, loggedInU
       setError("You must be logged in to subscribe.");
       return;
     }
-    if (loggedInUser.balance < Number(tier.price)) {
+    if (loggedInUser.balance < tier.price) {
       setError("Insufficient balance to subscribe to this tier.");
       return;
     }
@@ -46,7 +56,7 @@ export default function SubscriptionDialog({ open, onOpenChange, tier, loggedInU
         <DialogHeader>
           <DialogTitle>Subscribe to {tier.name}</DialogTitle>
           <DialogDescription>
-            Price: ${Number(tier.price).toFixed(2)} / {tier.durationInMonths} month{tier.durationInMonths > 1 ? "s" : ""}
+            Price: ${tier.price.toFixed(2)} / {tier.durationInMonths} month{tier.durationInMonths > 1 ? "s" : ""}
           </DialogDescription>
         </DialogHeader>
         {error && <p className="text-red-500">{error}</p>}

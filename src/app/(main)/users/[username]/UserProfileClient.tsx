@@ -92,7 +92,7 @@ export default function UserProfile({ user, loggedInUserId }: UserProfileProps) 
                   onClick={() => openSubscriptionDialog(tier)}
                 >
                   <span>{tier.name}</span>
-                  <span>${Number(tier.price).toFixed(2)} / {tier.durationInMonths} month{tier.durationInMonths > 1 ? "s" : ""}</span>
+                  <span>${tier.price.toFixed(2)} / {tier.durationInMonths} month{tier.durationInMonths > 1 ? "s" : ""}</span>
                 </button>
               ))}
             </div>
