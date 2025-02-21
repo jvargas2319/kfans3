@@ -161,6 +161,7 @@ model SubscriptionTier {
   subscriptions Subscription[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  durationInMonths Int @default(1)
 
   @@map("subscription_tiers")
 }
