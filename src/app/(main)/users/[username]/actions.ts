@@ -42,6 +42,7 @@ export async function updateUserProfile(values: UpdateUserProfileValues) {
             description: tier.description,
             price: tier.price,
             color: tier.color,
+            durationInMonths: tier.durationInMonths || 1,
             creatorId: user.id,
           },
           update: {
@@ -49,6 +50,7 @@ export async function updateUserProfile(values: UpdateUserProfileValues) {
             description: tier.description,
             price: tier.price,
             color: tier.color,
+            durationInMonths: tier.durationInMonths || 1,
           },
         })
       )

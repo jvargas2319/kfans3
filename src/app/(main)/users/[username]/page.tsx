@@ -143,7 +143,7 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
                   style={{ backgroundColor: tier.color || "#3b82f6" }}
                 >
                   <span>{tier.name}</span>
-                  <span>${Number(tier.price).toFixed(2)}</span>
+                  <span>${Number(tier.price).toFixed(2)} / {tier.durationInMonths} month{tier.durationInMonths > 1 ? "s" : ""}</span>
                 </button>
               ))}
             </div>

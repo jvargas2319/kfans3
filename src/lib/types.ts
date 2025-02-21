@@ -15,6 +15,7 @@ export function getUserDataSelect(loggedInUserId: string): Prisma.UserSelect {
         description: true,
         price: true,
         color: true,
+        durationInMonths: true,
       }
     },
     followers: {
