@@ -8,6 +8,7 @@ export function getUserDataSelect(loggedInUserId: string): Prisma.UserSelect {
     avatarUrl: true,
     bio: true,
     createdAt: true,
+    balance: true,
     createdTiers: {
       select: {
         id: true,
@@ -17,6 +18,20 @@ export function getUserDataSelect(loggedInUserId: string): Prisma.UserSelect {
         color: true,
         durationInMonths: true,
       }
+    },
+    subscriptions: {
+      select: {
+        id: true,
+        tier: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            durationInMonths: true,
+          },
+        },
+        expiresAt: true,
+      },
     },
     followers: {
       where: {
@@ -34,7 +49,7 @@ export function getUserDataSelect(loggedInUserId: string): Prisma.UserSelect {
   };
 }
 
-export type UserData = Prisma.UserGetPayload<{ select: ReturnType<typeof getUserDataSelect> }>;
+export type UserData = Omit<Prisma.UserGetPayload<{ select: ReturnType<typeof getUserDataSelect> }>, 'balance'> & { balance: number };
 
 export function getPostDataInclude(loggedInUserId: string) {
   return {

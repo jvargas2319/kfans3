@@ -156,3 +156,63 @@ export async function handleExpiredSubscriptions() {
     })
   );
 }
+
+export async function subscribe(tierId: string) {
+  const { user } = await validateRequest();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const tier = await prisma.subscriptionTier.findUnique({
+    where: { id: tierId },
+  });
+
+  if (!tier) throw new Error("Invalid tier");
+
+  if (user.balance < Number(tier.price)) throw new Error("Insufficient balance");
+
+  const subscription = await prisma.$transaction(async (tx) => {
+    const newSubscription = await tx.subscription.create({
+      data: {
+        subscriberId: user.id,
+        tierId: tier.id,
+        expiresAt: new Date(Date.now() + tier.durationInMonths * 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    await tx.user.update({
+      where: { id: user.id },
+      data: {
+        balance: {
+          decrement: Number(tier.price),
+        },
+      },
+    });
+
+    await tx.user.update({
+      where: { id: tier.creatorId },
+      data: {
+        balance: {
+          increment: Number(tier.price),
+        },
+      },
+    });
+
+    return newSubscription;
+  });
+
+  const updatedUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: getUserDataSelect(user.id),
+  });
+
+  return updatedUser;
+}
+
+export async function getLoggedInUser() {
+  const { user } = await validateRequest();
+  if (!user) return null;
+  return {
+    ...user,
+    balance: Number(user.balance),
+  };
+}
