@@ -130,6 +130,25 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
           </Linkify>
         </>
       )}
+      {user.createdTiers && user.createdTiers.length > 0 && (
+        <>
+          <hr />
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold">Subscription Tiers</h2>
+            <div className="flex flex-wrap gap-3">
+              {user.createdTiers.map((tier) => (
+                <button
+                  key={tier.id}
+                  className="flex items-center justify-between gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+                >
+                  <span>{tier.name}</span>
+                  <span>${Number(tier.price).toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
