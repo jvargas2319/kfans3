@@ -156,6 +156,7 @@ model SubscriptionTier {
   name        String
   description String?
   price       Decimal
+  color       String?
   creatorId   String
   creator     User          @relation("CreatorTiers", fields: [creatorId], references: [id], onDelete: Cascade)
   subscriptions Subscription[]

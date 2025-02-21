@@ -29,6 +29,7 @@ export const subscriptionTierSchema = z.object({
   name: requiredString.max(50, "Must be at most 50 characters"),
   description: z.string().max(500, "Must be at most 500 characters").optional(),
   price: z.number().min(0.01, "Price must be at least 0.01").max(999.99, "Price must be at most 999.99"),
+  color: z.string().optional(),
 });
 
 export const updateUserProfileSchema = z.object({
@@ -46,6 +47,7 @@ export type UpdateUserProfileValues = {
     name: string;
     price: number;
     description?: string;
+    color?: string;
   }[];
 };
 

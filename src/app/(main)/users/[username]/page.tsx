@@ -139,7 +139,8 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
               {user.createdTiers.map((tier) => (
                 <button
                   key={tier.id}
-                  className="flex items-center justify-between gap-2 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+                  className="flex items-center justify-between gap-2 rounded-lg px-4 py-2 text-primary-foreground hover:bg-primary/90"
+                  style={{ backgroundColor: tier.color || "#3b82f6" }}
                 >
                   <span>{tier.name}</span>
                   <span>${Number(tier.price).toFixed(2)}</span>

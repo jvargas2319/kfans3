@@ -156,6 +156,7 @@ export default function EditProfileDialog({
                       name: "",
                       description: "",
                       price: 4.99,
+                      color: "#3b82f6",
                     })
                   }
                   disabled={fields.length >= 10}
@@ -229,6 +230,19 @@ export default function EditProfileDialog({
                               {...field}
                               onChange={(e) => field.onChange(parseFloat(e.target.value))}
                             />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`subscriptionTiers.${index}.color`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Button Color</FormLabel>
+                          <FormControl>
+                            <input type="color" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

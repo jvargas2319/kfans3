@@ -13,7 +13,8 @@ export function getUserDataSelect(loggedInUserId: string): Prisma.UserSelect {
         id: true,
         name: true,
         description: true,
-        price: true
+        price: true,
+        color: true,
       }
     },
     followers: {

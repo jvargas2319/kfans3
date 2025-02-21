@@ -41,12 +41,14 @@ export async function updateUserProfile(values: UpdateUserProfileValues) {
             name: tier.name,
             description: tier.description,
             price: tier.price,
+            color: tier.color,
             creatorId: user.id,
           },
           update: {
             name: tier.name,
             description: tier.description,
             price: tier.price,
+            color: tier.color,
           },
         })
       )
